@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>San Valentín</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  background:#d8cbbb;
+  font-family:Arial;
+}
+
+/* INTRO */
+#intro{
+  position:absolute;
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.introWrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.heartBtn{
+  width:40px;
+  height:40px;
+  background:#c62828;
+  transform:rotate(45deg);
+  cursor:pointer;
+  position:relative;
+  animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{
+  0%{ transform:rotate(45deg) scale(1); }
+  50%{ transform:rotate(45deg) scale(1.15); }
+  100%{ transform:rotate(45deg) scale(1); }
+}
+
+.heartBtn:before,.heartBtn:after{
+  content:"";
+  position:absolute;
+  width:40px;
+  height:40px;
+  background:#c62828;
+  border-radius:50%;
+}
+.heartBtn:before{ left:-20px; }
+.heartBtn:after{ top:-20px; }
+
+#ground{
+  position:absolute;
+  bottom:40px;
+  width:100%;
+  height:2px;
+  background:#333;
+}
+
+#seed{
+  position:absolute;
+  width:14px;
+  height:14px;
+  background:#c62828;
+  border-radius:50%;
+  left:50%;
+  top:45%;
+  transform:translateX(-50%);
+  display:none;
+}
+
+.seedHeart{
+  transform:translateX(-50%) rotate(45deg) scale(1.3);
+  border-radius:0;
+}
+
+.seedHeart:before,
+.seedHeart:after{
+  content:"";
+  position:absolute;
+  width:14px;
+  height:14px;
+  background:#c62828;
+  border-radius:50%;
+}
+
+#text{
+  position:absolute;
+  left:8%;
+  top:20%;
+  max-width:420px;
+  opacity:0;
+}
+
+#counter{
+  position:absolute;
+  bottom:60px;
+  left:12px;
+  font-size:18px;
+  opacity:0;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  display:none;
+}
+
+/* MOBILE */
+@media (max-width:700px){
+  #counter{
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+  }
+
+  #text{
+    left:6%;
+    top:6%;
+    max-width:260px;
+    font-size:15px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div class="introWrap">
+    <div class="heartBtn" id="start"></div>
+    <div>San Valentín</div>
+    <div>Haz clic</div>
+  </div>
+</div>
+
+<div id="ground"></div>
+<div id="seed"></div>
+
+<div id="text">
+  <p><b>Para mi tamagotchi hermosa:</b></p>
+  <p>Si pudiera elegir un lugar tranquilo, sería a tu lado.</p>
+  <p>Me gusta cómo se siente el tiempo cuando lo comparto contigo.</p>
+</div>
+
+<div id="counter"></div>
+<canvas id="c"></canvas>
+
+<script>
+const intro=document.getElementById("intro");
+const seed=document.getElementById("seed");
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+const text=document.getElementById("text");
+const startBtn=document.getElementById("start");
+const counter=document.getElementById("counter");
+
+const isMobile = window.innerWidth < 700;
+const scale = isMobile ? 0.55 : 1;
+const groundY = window.innerHeight - 40;
+
+/* CONTADOR */
+const startDate=new Date("2025-08-16T00:56:00Z");
+
+function startCounter(){
+  counter.animate([{opacity:0},{opacity:1}],
+  {duration:1000,fill:"forwards"});
+
+  setInterval(()=>{
+    const diff=new Date()-startDate;
+    const d=Math.floor(diff/86400000);
+    const h=Math.floor(diff%86400000/3600000);
+    const m=Math.floor(diff%3600000/60000);
+    const s=Math.floor(diff%60000/1000);
+
+    counter.innerHTML =
+    `Tiempo desde aquel Hey... Jude...<br>
+     <b>${d}</b> días 
+     <b>${h}</b> horas 
+     <b>${m}</b> minutos 
+     <b>${s}</b> segundos`;
+  },1000);
+}
+
+startBtn.onclick=()=>{
+  intro.style.display="none";
+  seed.style.display="block";
+  startSeedAnimation();
+};
+
+function startSeedAnimation(){
+  seed.animate([{top:"45%"},{top:"calc(100% - 60px)"}],
+  {duration:1200,fill:"forwards"});
+  setTimeout(bounceSeed,1200);
+}
+
+function bounceSeed(){
+  seed.animate([{top:"calc(100% - 60px)"},{top:"55%"}],
+  {duration:500,fill:"forwards"});
+  setTimeout(()=>{
+    seed.classList.add("seedHeart");
+    moveHeartToTree();
+  },450);
+}
+
+function moveHeartToTree(){
+  const endX=isMobile ? window.innerWidth*0.5 : window.innerWidth*0.85;
+  const endY=isMobile ? window.innerHeight*0.52 : window.innerHeight*0.48;
+
+  seed.animate([
+    {left:"50%", top:"55%"},
+    {left:endX+"px", top:endY+"px"}
+  ],{duration:1200,fill:"forwards"});
+
+  setTimeout(startHeartAnimation,700);
+}
+
+function startHeartAnimation(){
+
+  startCounter();
+
+  canvas.style.display="block";
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+
+  const cx=isMobile ? canvas.width*0.5 : canvas.width*0.85;
+  const cy=isMobile ? canvas.height*0.52 : canvas.height*0.48;
+
+  const colors=["#c8102e","#e63946","#ff6b6b","#ff8fa3","#ffb3c1"];
+
+  function drawHeart(x,y,s,color){
+    ctx.fillStyle=color;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.bezierCurveTo(x,y-0.7*s,x-s,y-0.7*s,x-s,y);
+    ctx.bezierCurveTo(x-s,y+0.7*s,x,y+1.1*s,x,y+1.4*s);
+    ctx.bezierCurveTo(x,y+1.1*s,x+s,y+0.7*s,x+s,y);
+    ctx.bezierCurveTo(x+s,y-0.7*s,x,y-0.7*s,x,y);
+    ctx.fill();
+  }
+
+  function insideHeart(x,y){
+    x/=25;
+    y/=25;
+    return Math.pow(x*x+y*y-1,3)-x*x*y*y*y<=0;
+  }
+
+  const leaves=[];
+  const falling=[];
+  let spawnIndex=0;
+
+  for(let i=0;i<520;i++){
+    let x,y;
+    do{
+      x=Math.random()*520-260;
+      y=Math.random()*460-260;
+    }while(!insideHeart(x,y));
+
+    leaves.push({
+      x:cx+x*5*scale,
+      y:cy-y*5*scale,
+      size:(8+Math.random()*5)*scale,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      visible:false
+    });
+  }
+
+  class FallingLeaf{
+    constructor(l){
+      this.x=l.x;
+      this.y=l.y;
+      this.vx=isMobile ? 0 : -1.2;
+      this.vy=0.8;
+      this.size=l.size;
+      this.color=l.color;
+      this.swing=Math.random()*Math.PI;
+      this.rot=Math.random()*Math.PI;
+    }
+    update(){
+      this.swing+=0.05;
+      this.rot+=0.02;
+      this.x+=this.vx+Math.sin(this.swing)*0.3;
+      this.y+=this.vy;
+      if(this.y > groundY) this.y = groundY;
+    }
+    draw(){
+      ctx.save();
+      ctx.translate(this.x,this.y);
+      ctx.rotate(this.rot);
+      drawHeart(0,0,this.size,this.color);
+      ctx.restore();
+    }
+  }
+
+  setInterval(()=>{
+    if(spawnIndex<leaves.length){
+      leaves[spawnIndex].visible=true;
+      spawnIndex++;
+    }
+  },4);
+
+  setInterval(()=>{
+    if(Math.random()<0.35){
+      const l=leaves[Math.floor(Math.random()*leaves.length)];
+      if(l.visible) falling.push(new FallingLeaf(l));
+    }
+  },500);
+
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    leaves.forEach(l=>{
+      if(l.visible){
+        drawHeart(l.x,l.y,l.size,l.color);
+      }
+    });
+
+    falling.forEach(f=>{
+      f.update();
+      f.draw();
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  setTimeout(()=>{
+    seed.style.display="none";
+    text.animate([{opacity:0},{opacity:1}],
+    {duration:2000,fill:"forwards"});
+  },2500);
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
