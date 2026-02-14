@@ -11,7 +11,7 @@ html,body{
   height:100vh;
   overflow:hidden;
   background:#d8cbbb;
-  font-family:Arial;
+  font-family:Georgia, serif;
 }
 
 /* INTRO */
@@ -57,7 +57,14 @@ html,body{
 }
 .heartBtn:before{ left:-20px; }
 .heartBtn:after{ top:-20px; }
+.title{
+  font-size:30px;
+}
 
+.subtitle{
+  opacity:.7;
+  font-size:14px;
+}
 #ground{
   position:absolute;
   bottom:40px;
@@ -137,8 +144,8 @@ canvas{
 <div id="intro">
   <div class="introWrap">
     <div class="heartBtn" id="start"></div>
-    <div>Y pensar que esto empezó con un suéter de Shingeki...</div>
-    <div>Presiona el corazón</div>
+    <div class="title">Y pensar que esto empezó con un suéter de Shingeki...</div>
+    <div class="subtitle">Presiona el corazón</div>
   </div>
 </div>
 
@@ -343,6 +350,7 @@ function startHeartAnimation(){
 
 </body>
 </html>
+
 
 
 
